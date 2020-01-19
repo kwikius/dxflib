@@ -12,7 +12,6 @@ int main()
    dxf::file_image_t file_image{dxf::acad_version_t::R14};
 
    auto layer = new dxf::layer_t{"MyLayer1"};
-   
    file_image.add_layer(layer);
 
    dxf::lwpolyline_t * poly = new dxf::lwpolyline_t {
@@ -23,13 +22,13 @@ int main()
    };
 
    poly->set_layer_name(layer->get_layer_name());
-   poly->set_closed(true);
    poly->set_colour_number(dxf::colour::cyan);
+
    file_image.entities.add(poly);
 
-   std::ofstream out{"outputx.dxf"};
+   std::ofstream out{"output1.dxf"};
 
-   file_image.output(out);
+   out << file_image;
   
    return 0;
 }
