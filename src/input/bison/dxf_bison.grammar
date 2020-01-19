@@ -1,0 +1,192 @@
+
+
+%{ 
+
+/*
+  dxf bison grammar - headers 
+*/
+
+#include "dxf_bison_fwd.hpp"
+
+#ifndef YYSTYPE
+#error  YYSTYPE not defined
+#endif
+
+%}
+ /*
+     at global scope
+     HEADERSECTION = 0 SECTION 2 HEADER
+     CLASSESCTION = 0 SECTION 2 CLASSES
+     TABLESSECTION = 0 SECTION 2 TABLES
+     etc
+  */
+%token 
+      HEADERSECTION HEADERDATA 
+      CLASSESSECTION TABLESSECTION BLOCKSSECTION ENTITIESSECTION OBJECTSSECTION
+      THUMBNAILIMAGESECTION UNKNOWNSECTION ENDSEC COMMENT UNKNOWNOBJECT
+      BLOCK ENDBLOCK
+      TABLE ENDTAB
+
+      LTYPETABLE LAYERTABLE UNKNOWNTABLE 
+
+      UNKNOWNENTITY LINE LWPOLYLINE
+
+      DATAPAIR
+
+      EOF_DXF_FILE
+%%
+
+DXF_File :
+   Sections  EOF_DXF_FILE
+;
+
+SectionOrComment :
+     Section 
+   | Comment
+   | UNKNOWNOBJECT
+;
+
+Sections :
+     SectionOrComment
+   | Sections SectionOrComment
+;
+
+Section :
+     HeaderSection
+   | ClassesSection
+   | TablesSection
+   | BlocksSection
+   | EntitiesSection
+   | ObjectsSection
+   | ThumbnailImageSection
+   | UnknownSection
+;
+
+HeaderSection :
+   HEADERSECTION HEADERDATA ENDSEC
+;
+
+ClassesSection :
+   CLASSESSECTION OptDataPairs ENDSEC
+;
+
+TablesSection :
+   TABLESSECTION OptTables ENDSEC
+;
+
+BlocksSection :
+   BLOCKSSECTION OptBlocks ENDSEC
+;
+  
+OptBlocks :
+     %empty
+   | Blocks
+;
+
+Blocks :
+     Block
+   | Blocks Block
+;
+
+Block :
+   BLOCK ENDBLOCK
+;
+
+EntitiesSection :
+   ENTITIESSECTION OptEntities ENDSEC
+;
+
+EntityOrComment :
+   Entity
+   | Comment
+;
+
+Entities :
+     EntityOrComment
+   | Entities EntityOrComment
+;
+
+OptEntities :
+   %empty
+   | Entities
+;
+
+Entity :
+    Line
+  | LwPolyLine
+  | UNKNOWNENTITY
+;
+
+Line:
+   LINE 
+;
+
+LwPolyLine :
+   LWPOLYLINE 
+;
+
+ObjectsSection :
+   OBJECTSSECTION OptDataPairs ENDSEC
+;
+
+ThumbnailImageSection :
+   THUMBNAILIMAGESECTION OptDataPairs ENDSEC
+;
+
+UnknownSection :
+   UNKNOWNSECTION ENDSEC
+;
+
+TableOrComment :
+     Table
+   | Comment
+;
+
+Tables :
+     TableOrComment
+   | Tables TableOrComment
+;
+
+LtypeTable :
+    LTYPETABLE  OptDataPairs ENDTAB
+;
+
+LayerTable :
+    LAYERTABLE OptDataPairs ENDTAB
+;
+
+UnknownTable :
+   UNKNOWNTABLE OptDataPairs ENDTAB
+;
+
+OptTables :
+   %empty
+   | Tables
+;
+
+Table :
+      LtypeTable
+    | LayerTable
+    | UnknownTable
+;
+
+Comment :
+   COMMENT 
+;
+
+DataPair :
+    DATAPAIR
+;
+
+DataPairs :
+   DataPair
+ | DataPairs DataPair
+;
+
+OptDataPairs :
+    %empty
+  | DataPairs
+;
+      
+%%
+
