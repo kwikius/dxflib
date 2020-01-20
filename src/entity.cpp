@@ -21,9 +21,11 @@ std::ostream & dxf::entity_t::output_head(std::ostream & os) const
       // handle
       os << "   5\n" << std::hex << get_handle() << std::dec << "\n";
       os << std::dec << "   100\nAcDbEntity\n";
-      os << "   8\n" << get_layer_name() << '\n';
-      os << "   62\n" << get_colour_number() << "\n"; // default color number is 
    }
+
+   os << "   8\n" << get_layer_name() << '\n';
+   os << "   62\n" << get_colour_number() << "\n"; // default color number is 
+   
    return os;
 }
 
