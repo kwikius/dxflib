@@ -42,3 +42,8 @@ void dxf::file_image_t::add_layer(dxf::layer_t* layer)
 {
    tables.get_layers_table()->add_layer(layer);
 }
+
+bool dxf::file_image_t::layer_exists(std::string const & layer_name)const
+{
+   return tables.get_layers_table()->layer_exists(layer_name);
+}

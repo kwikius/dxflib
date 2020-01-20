@@ -27,6 +27,11 @@ namespace dxf{
          return os;
       }
 
+      bool layer_exists(std::string const & layer_name)const
+      {
+         return m_layers_map.find(layer_name) != m_layers_map.end();
+      }
+
       void add_layer(layer_t * layer)
       {
          assert(layer != nullptr);

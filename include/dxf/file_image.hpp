@@ -25,13 +25,15 @@ namespace dxf{
 
       file_image_t( const char * filename);
 
-
       header_t header;
       tables_t tables;
       blocks_t blocks;
       entities_t entities;
 
       void add_layer( layer_t*);
+      bool layer_exists(std::string const & layer_name)const;
+      void set_acad_version(acad_version_t version)
+      {header.set_acad_version(version);}
       
       std::ostream & output(std::ostream & os) const;
 
