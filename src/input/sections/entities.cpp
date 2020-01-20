@@ -7,19 +7,14 @@
 #include <quan/three_d/out/vect.hpp>
 
 #include <dxf/entity/line.hpp>
+#include <dxf/entity/lwpolyline.hpp>
 
 #include "../lexer.hpp"
 #include "../sections.hpp"
 
 namespace {
-
-   typedef bool (*entity_output_function_t)(std::list<dxf::input::lexer::groupcode_pair> const & args );
-   struct entity_type_t{
-      int id ;
-      entity_output_function_t output_function;
-   };
-
    // should work for several entity types
+   // entity/layer parsing
    bool get_layer(std::list<dxf::input::lexer::groupcode_pair> const & args, std::string & layer )
    {
       auto iter = std::find_if(args.begin(),args.end(),[](const auto & gp){ return gp.first == 8;});
@@ -28,7 +23,7 @@ namespace {
          : false;
    }
 
-   // should work for several entity types
+   // entity/colour parsing
    bool get_colour(std::list<dxf::input::lexer::groupcode_pair> const & args, int16_t & colour)
    {
       auto iter = std::find_if(args.begin(),args.end(),[](const auto & gp){ return gp.first == 62;});
@@ -46,6 +41,7 @@ namespace {
       }
    }
 
+   //common entity attributes input parsing function
    bool add_entity_attributes(std::list<dxf::input::lexer::groupcode_pair> const & args, dxf::entity_t * entity)
    {
       std::string layer; get_layer(args,layer);
@@ -65,20 +61,22 @@ namespace {
             }
             std::cout << ";\n";
         }
+
         if ( send_dxf_input_to_image() ){
              assert(entity != nullptr);
 
              if ( layer != ""){
                 entity->set_layer_name(layer);
              }
+
              if( colour != -1){
                entity->set_colour_number(colour);
              }
         }
         return true;
    }
-   
-   typedef std::map<std::string,entity_type_t> entity_type_map_t;
+
+   // line input parsing function
    bool line(std::list<dxf::input::lexer::groupcode_pair> const & args )
    {
       dxf::line_t * line = nullptr;
@@ -100,23 +98,42 @@ namespace {
       }
    }
 
+   // lwpolyline input parsing function
    bool lwpolyline(std::list<dxf::input::lexer::groupcode_pair> const & args )
    {
       if ( send_dxf_input_to_stdout() ){
-         std::cout << "polyline\n";
+         std::cout << "lwpolyline\n";
       }
-      quan::two_d::vect<double> point;
+
+      dxf::lwpolyline_t * lwpolyline = nullptr;
+
+      if ( send_dxf_input_to_image() ){
+         auto file_image = get_dxf_file_image();
+         lwpolyline = new dxf::lwpolyline_t{};
+         file_image->entities.add(lwpolyline);
+      }
+
+      quan::two_d::vect<double> point; // point to read input to
       uint8_t point_data_complete_flags = 0; // bit[0] x, bit[1] y use to check point has all reqd data
       for ( auto const & gp : args){
-
          switch (gp.first){
+            case 70: { // open/closed
+                  int oc = -1;
+                  if ( !dxf::input::lexer::get_integer(gp.second,oc)){
+                     dxf_bison_error("lwpolyline : invalid open/closed");
+                     return false;
+                  }
+                  if ( send_dxf_input_to_image() ){
+                    lwpolyline->set_closed(oc != 0);
+                  }
+                  if ( send_dxf_input_to_stdout() ){
+                     std::cout << ((oc !=0) ? "closed" : "open");
+                     std::cout << " lwpolyline\n";
+                  }
+               }
+               break;
 
-            // add layer
-            // add colour
-            // add open/closed
-
-            // current/next point.x
-            case 10:
+            case 10: // // current/next point.x
                if ( (point_data_complete_flags & 0b01) != 0){
                   dxf_bison_error("lwpolyline : invalid point.x");
                   return false;
@@ -127,8 +144,8 @@ namespace {
                }
                point_data_complete_flags |= 0b01;
                break;
-            // current/ next point.y
-            case 20:
+            
+            case 20: // // current/ next point.y
                if ( (point_data_complete_flags & 0b10) != 0 ){
                   dxf_bison_error("lwpolyline : invalid point.y");
                   return false;
@@ -139,6 +156,7 @@ namespace {
                }
                point_data_complete_flags |= 0b10;
                break;
+
             default:
                break;
          }
@@ -146,6 +164,9 @@ namespace {
          if ( point_data_complete_flags == 0b11){
             if ( send_dxf_input_to_stdout() ){
                std::cout << point <<'\n';
+            }
+            if ( send_dxf_input_to_image() ){
+               lwpolyline->push_back(point);
             }
             point_data_complete_flags = 0b00;
          }
@@ -155,14 +176,27 @@ namespace {
          dxf_bison_error("lwpolyline : invalid last point");
          return false;
       }
+      add_entity_attributes(args,lwpolyline);
       return true;
    }
+
+   // function for parsing arg sets
+   typedef bool (*entity_output_function_t)(std::list<dxf::input::lexer::groupcode_pair> const & args );
+
+   //map entity id to a parse function
+   struct entity_type_t{
+      int id ;
+      entity_output_function_t output_function;
+   };
+   
+   typedef std::map<std::string,entity_type_t> entity_type_map_t;
 
    entity_type_map_t entity_type_map ={
       {"LINE",entity_type_t{LINE,line}}
       ,{"LWPOLYLINE",entity_type_t{LWPOLYLINE,lwpolyline}}
    };
 
+   // entity level parser emit for entities
    bool output_entity(token & tok,std::stack<dxf::input::lexer::groupcode_pair>& pair_stack)
    {
       assert(pair_stack.size() > 1);
@@ -228,10 +262,9 @@ namespace {
       {0,dxf::input::lexer::group_function_t{dxf_entities_func} }
    };
 
-}
+} // namespace
 
 void init_entities_fun_map(section_type_map_t & section_type_map)
 {
    section_type_map["ENTITIES"]= {ENTITIESSECTION,&entities_fun_map};
 }
-

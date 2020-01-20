@@ -25,9 +25,9 @@ std::ostream& dxf::table_t::output_head (std::ostream& os) const
    if ( get_file_image().header.get_acad_version() > dxf::acad_version_t::R12){
       os << "   5\n" << std::hex << get_handle() << std::dec << "\n";
       // Soft-pointer ID/handle to owner object
-       os << "   330\n0\n";
-       os << "   100\nAcDbSymbolTable\n";
-       os << "   70\n" << get_max_entries() << '\n';
+      os << "   330\n0\n";
+      os << "   100\nAcDbSymbolTable\n";
+      os << "   70\n" << get_max_entries() << '\n';
    }
    return os;
 }

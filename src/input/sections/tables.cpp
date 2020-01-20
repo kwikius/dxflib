@@ -3,62 +3,53 @@
 #include "../lexer.hpp"
 #include "../sections.hpp"
 
+#include "tables.hpp"
+
+
 namespace {
 
-   struct table_type_t{
-      int id;
-      dxf::input::lexer::fun_map_t * fun_map;
-   };
-   typedef std::map<std::string, table_type_t> table_type_map_t;
+   dxf::input::lexer::map_function_t  current_table_function = nullptr;
 
-   // map table type to functions e.g LTYPE LAYER etc
-   table_type_map_t table_type_map;
 }
 
-// map for types of table
-void init_table_type_map()
+void clear_current_tables_function()
 {
-/*
-   init_appid_map();
-   init_block_record_map();
-   init_dimstyle_map();
-   init_layer_map();
-   init_ltype_map();
-   init_style_map();
-   init_ucs_map();
-   init_view_map();
-   init_vport_map();
-*/
+   current_table_function = nullptr;
 }
+
 
 namespace {
 
-
+   std::map<std::string,dxf::input::lexer::map_function_t> tables_function_map{
+      {"LAYER",layer_table_function }
+   };
 
    // 0
    int dxf_tables_func(std::string const & str,token & tok, std::ostream & out)
    {
-      // 0 TABLE
+      // 0 TABLE / ENDTAB/ENDSEC
       if ( str == "TABLE"){
-
          dxf::input::lexer::groupcode_pair g_pair;
          if (!dxf::input::lexer::get_next_pair(g_pair)){
             return 0;
          }
          if ( g_pair.first != 2){
-            dxf_bison_error("unexpected group code afer TABLE");
+            dxf_bison_error("unexpected group code after TABLE");
             return 0;
          }
-         std::cout << "In table : " << g_pair.second << " {\n";
-         auto iter = table_type_map.find(g_pair.second);
-         if ( iter != table_type_map.end()){
-            table_type_t const & tt = iter->second;
-            tok.set_id(tt.id);
-            dxf::input::lexer::set_fun_map(tt.fun_map);
+         auto iter = tables_function_map.find(g_pair.second);
+         if ( iter != tables_function_map.end()){
+            if (send_dxf_input_to_stdout()){
+               std::cout << "in table : " << g_pair.second <<'\n';
+            }
+            return iter->second(str,tok,out);
          }else{
             // unknown table type
             tok.set_id(UNKNOWNTABLE);
             // remove data till end of table
+            if (send_dxf_input_to_stdout()){
+               std::cout << "in unknown table : " << g_pair.second <<'\n';
+            }
             for (;;){
                if (!dxf::input::lexer::peek_next_pair(g_pair)){
                      return 0;
@@ -94,11 +85,12 @@ namespace {
    dxf::input::lexer::fun_map_t tables_fun_map = {
      {0,dxf::input::lexer::group_function_t{dxf_tables_func}}
    };
-}
+
+}//namespace
 
 void init_tables_fun_map(section_type_map_t & section_type_map)
 {
   //  tables_fun_map[0] = dxf_lexer::group_function_t{dxf_tables_func};
     section_type_map["TABLES"]= {TABLESSECTION,&tables_fun_map};
-    init_table_type_map();
+  //  init_table_type_map();
 }
