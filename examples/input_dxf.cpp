@@ -10,7 +10,8 @@ int main(int argc , const char* argv[])
       try{
 
          dxf::file_image_t dxf_image(argv[1]);
-
+         // for inkscape minimum version is R14
+         dxf_image.set_acad_version(dxf::acad_version_t::R14);
          std::ofstream out{"output_test2.dxf"};
          out << dxf_image;
 
