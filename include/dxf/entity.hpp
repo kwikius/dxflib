@@ -16,7 +16,8 @@ namespace dxf{
          unknown,
          line,
          vertex,
-         lwpolyline
+         lwpolyline,
+         face3d
       };
 
       virtual ~entity_t (){}

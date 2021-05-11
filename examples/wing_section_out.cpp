@@ -5,11 +5,9 @@
 
 int main(int argc,const char* argv[])
 {
-   dxf::file_image_t file_image{dxf::acad_version_t::R14};
+   aerofoil foil("/home/andy/cpp/projects/aerofoil/Sections/selig/ag34.dat");
 
-   aerofoil foil("/home/andy/cpp/projects/aerofoil/Sections/selig/ag16.dat");
+   std::ofstream out("ag34_200_mm_1_mm.dxf");
 
-   std::ofstream out("ag16_150_mm_1_mm.dxf");
-
-   foil.output_dxf(out,quan::length::mm{150},quan::length::mm{1});
+   foil.output_dxf(out,quan::length::mm{200},quan::length::mm{1});
 }

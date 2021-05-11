@@ -8,6 +8,7 @@
 
 #include <dxf/entity/line.hpp>
 #include <dxf/entity/lwpolyline.hpp>
+#include <dxf/entity/face3d.hpp>
 
 #include "../lexer.hpp"
 #include "../sections.hpp"
@@ -51,7 +52,7 @@ namespace {
        if ( send_dxf_input_to_stdout() ){
           //  std::cout <<  "Line";
             if (layer != ""){
-            std::cout << ", layer = " << layer;
+               std::cout << ", layer = " << layer;
             }
             if ( colour != -1){
                if ( layer != ""){
@@ -180,6 +181,73 @@ namespace {
       return true;
    }
 
+ /*
+ 3DFACE    Four points defining the corners of the face: (10, 20, 30),
+            (11, 21, 31), (12, 22, 32), and (13, 23, 33).  70 (invisible
+            edge flags -optional 0).  If only three points were entered
+            (forming a triangular face), the third and fourth points will
+            be the same.  The meanings of the bit-coded "invisible edge
+            flags" are shown in the following table.
+
+                      Flag bit value           Meaning
+                             1        First edge is invisible
+                             2        Second edge is invisible
+                             4        Third edge is invisible
+                             8        Fourth edge is invisible
+*/
+
+     // 3d face input parsing function
+   //100 Subclass marker (AcDbFace)
+   bool face3d(std::list<dxf::input::lexer::groupcode_pair> const & args )
+   {
+
+      dxf::face3d_t * face3d = nullptr;
+
+      quan::three_d::vect<double> pts[4];
+      uint16_t visibility_flags;
+
+      // get all the points
+      for ( uint32_t i = 0; i < 4; ++i){
+         bool const result = dxf::input::lexer::get_vect3double(10 + i, 20 + i, 30 + i,args,pts[i]);
+      
+         if ( !result){
+            if ( i == 3){
+              pts[3] = pts[2];
+            }else{
+               dxf_bison_error("3d face : invalid point arguments");
+               return false;
+            }
+         }
+      }
+      // get visibility flags
+      auto iter = std::find_if(args.begin(),args.end(),[](const auto & gp){ return gp.first == 70;});
+      if(iter != args.end()) {
+         int temp = 0;
+         if (dxf::input::lexer::get_integer(iter->second,temp)){
+            visibility_flags = static_cast<uint16_t>(temp);
+         }else{
+            dxf_bison_error("face3d : invalid visibility flags");
+            return false;
+         }
+      }else{
+         dxf_bison_error("face3d : invalid arguments");
+         return false;
+      }
+      if ( send_dxf_input_to_stdout() ){     
+         std::cout << "3dFace [" << pts[0] << ", " << pts[1] << ", " << pts[2] << ", " << pts[3] << "]";
+         std::cout << "visibility flags = " << visibility_flags <<'\n';
+      }
+
+      if ( send_dxf_input_to_image() ){
+          auto file_image = get_dxf_file_image();
+          face3d = new dxf::face3d_t(pts,visibility_flags);
+          file_image->entities.add(face3d);
+       }
+       add_entity_attributes(args,face3d);
+       return true;
+     // find 
+   }
+
    // function for parsing arg sets
    typedef bool (*entity_output_function_t)(std::list<dxf::input::lexer::groupcode_pair> const & args );
 
@@ -192,8 +260,12 @@ namespace {
    typedef std::map<std::string,entity_type_t> entity_type_map_t;
 
    entity_type_map_t entity_type_map ={
+
       {"LINE",entity_type_t{LINE,line}}
+     //3DLINE appears to be the same as LINE
+      ,{"3DLINE",entity_type_t{LINE,line}}
       ,{"LWPOLYLINE",entity_type_t{LWPOLYLINE,lwpolyline}}
+      ,{"3DFACE",entity_type_t{FACE3D,face3d}}
    };
 
    // entity level parser emit for entities

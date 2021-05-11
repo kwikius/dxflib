@@ -29,7 +29,7 @@
 
       LTYPETABLE LAYERTABLE UNKNOWNTABLE 
 
-      UNKNOWNENTITY LINE LWPOLYLINE
+      UNKNOWNENTITY LINE LWPOLYLINE FACE3D
 
       DATAPAIR
 
@@ -114,11 +114,16 @@ OptEntities :
 Entity :
     Line
   | LwPolyLine
+  | Face3D
   | UNKNOWNENTITY
 ;
 
 Line:
    LINE 
+;
+
+Face3D :
+   FACE3D
 ;
 
 LwPolyLine :

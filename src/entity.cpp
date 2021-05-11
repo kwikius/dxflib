@@ -10,7 +10,8 @@ namespace{
    std::map<dxf::entity_t::entity_type_t,std::string> entity_output_string_map = {
       {dxf::entity_t::entity_type_t::line,"LINE"},
       {dxf::entity_t::entity_type_t::vertex,"VERTEX"},
-      {dxf::entity_t::entity_type_t::lwpolyline,"LWPOLYLINE"}
+      {dxf::entity_t::entity_type_t::lwpolyline,"LWPOLYLINE"},
+      {dxf::entity_t::entity_type_t::face3d,"3DFACE"}
    };
 }
 

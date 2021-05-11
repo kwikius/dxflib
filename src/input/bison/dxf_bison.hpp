@@ -67,8 +67,9 @@ extern int dxf_bison_debug;
     UNKNOWNENTITY = 277,
     LINE = 278,
     LWPOLYLINE = 279,
-    DATAPAIR = 280,
-    EOF_DXF_FILE = 281
+    FACE3D = 280,
+    DATAPAIR = 281,
+    EOF_DXF_FILE = 282
   };
 #endif
 
