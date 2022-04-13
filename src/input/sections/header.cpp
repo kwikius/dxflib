@@ -21,12 +21,12 @@ namespace {
    AutoCAD drawing database version number:
       AC1006 = R10;
       AC1009 = R11 and R12;
-      AC1012 = R13; 
+      AC1012 = R13;
       AC1014 = R14;
       AC1015 = AutoCAD 2000;
       AC1018 = AutoCAD 2004;
       AC1021 = AutoCAD 2007;
-      AC1024 = AutoCAD 2010 
+      AC1024 = AutoCAD 2010
 */
    const std::map<std::string,dxf::acad_version_t> acad_version_map = {
       {"AC1006",dxf::acad_version_t::AC1006},
@@ -41,7 +41,7 @@ namespace {
    //$ACADVER
    bool acadver(std::list<dxf::input::lexer::groupcode_pair> const & args )
    {
-      // expect 1 arg 
+      // expect 1 arg
       if(args.size() !=1){
          dxf_bison_error("expected 1 argument to header variable");
          return false;
@@ -70,7 +70,7 @@ namespace {
    // $HANDSEED  next free handle
    bool handseed(std::list<dxf::input::lexer::groupcode_pair> const & args )
    {
-      // expect 1 arg 
+      // expect 1 arg
       if(args.size() !=1){
          dxf_bison_error("expected 1 argument to header variable");
          return false;
@@ -82,8 +82,9 @@ namespace {
             std::cout << "Next Free Handle  = " << arg.second << "\n";
          }
          if( send_dxf_input_to_image()){
-            int32_t temp = -1;
-            if ( !dxf::input::lexer::get_integer(arg.second,temp) ){
+            uint64_t temp = 0;
+            //
+            if ( !dxf::input::lexer::get_handle(arg.second,temp) ){
                dxf_bison_error("failed to comvert $handseed to int");
                return false;
             }
@@ -164,23 +165,23 @@ namespace {
          return false;
       }
    }
-   
+
    // Add header variables and their parse functions as needed here
    header_variables_map_t header_variables_map = {
        {"$ACADVER",acadver} ,
        {"$HANDSEED",handseed} ,
-       {"$MEASUREMENT",measurement}, // 
+       {"$MEASUREMENT",measurement}, //
        {"$EXTMIN",extmin},
        {"$EXTMAX",extmax},
        {"$INSBASE",insbase}
    };
-   
+
 }
 
 namespace {
 
    bool output_header_variable(std::stack<dxf::input::lexer::groupcode_pair>& pair_stack){
-      
+
       assert(pair_stack.size() > 1);
 
       // create a list for variable args
@@ -193,7 +194,7 @@ namespace {
       // last left on stack is variable name
       auto var_name = pair_stack.top();
       pair_stack.pop();
-     
+
       // look up variable name in map
       auto iter = header_variables_map.find(var_name.second);
       if ( iter != header_variables_map.end()){
@@ -224,13 +225,13 @@ namespace {
          if (!dxf::input::lexer::peek_next_pair(g_pair)){
             return 0;
          }
-         
+
          if ( ( g_pair.first == 0 ) || (g_pair.first == 9)){
             // peeked start of next var or endsec
             if ( ! output_header_variable(pair_stack)){
                return 0;
             }
-            if (g_pair.first == 0 ){ 
+            if (g_pair.first == 0 ){
                break;
             }
          }
@@ -247,7 +248,7 @@ namespace {
    dxf::input::lexer::fun_map_t header_fun_map = {
      {9,dxf::input::lexer::group_function_t{dxf_header_variable_func}},
      {0,dxf::input::lexer::group_function_t{end_section_func}}
-   }; 
+   };
 
 }  //namespace
 

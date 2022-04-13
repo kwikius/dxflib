@@ -11,7 +11,7 @@
 
 #include "bison.hpp"
 
-namespace dxf { namespace input { 
+namespace dxf { namespace input {
 
    struct lexer{
 
@@ -38,7 +38,7 @@ namespace dxf { namespace input {
       }
 
       static void set_fun_map(fun_map_t* fmap) { m_cur_fun_map = fmap;}
-
+      static bool get_handle(std::string const & str_in, uint64_t & handle);
       static bool get_integer(std::string const & str_in, int & out);
       static bool get_double(std::string const & str_in, double & out);
       static bool get_vect3double(int xid, int yid, int zid,std::list<dxf::input::lexer::groupcode_pair> const & args, quan::three_d::vect<double> & vect_out);
@@ -50,7 +50,7 @@ namespace dxf { namespace input {
       static std::istream * m_inputstream;
       static quan::lexer::filepos m_filepos;
       static fun_map_t* m_cur_fun_map; // current map functions
-      
+
    };
 
 }}

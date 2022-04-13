@@ -7,15 +7,15 @@
 namespace {
 
    std::map<dxf::table_t::table_type_t,std::string> table_output_string_map = {
-       
+
        {dxf::table_t::table_type_t::block_record,"BLOCK_RECORD"},
        {dxf::table_t::table_type_t::dimstyle,"DIMSTYLE"},
        {dxf::table_t::table_type_t::layer,"LAYER"},
-       {dxf::table_t::table_type_t::ltype,"LTYPE"},  
+       {dxf::table_t::table_type_t::ltype,"LTYPE"},
        {dxf::table_t::table_type_t::style,"STYLE"},
        {dxf::table_t::table_type_t::ucs,"UCS"},
        {dxf::table_t::table_type_t::view,"VIEW"},
-       {dxf::table_t::table_type_t::vport,"VPORT"},    
+       {dxf::table_t::table_type_t::vport,"VPORT"},
    };
 }
 
@@ -31,7 +31,6 @@ std::ostream& dxf::table_t::output_head (std::ostream& os) const
    }
    return os;
 }
-
 
 std::ostream& dxf::table_t::output_tail(std::ostream& os) const
 {

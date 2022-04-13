@@ -19,10 +19,10 @@ namespace dxf{
       // dxf output is dependent on acad version
       // TODO ADD a Minimal file version
       // which just does minimal output?
-      
 
-      header_t(file_image_t & file_image) 
-         :section_t{file_image,section_type::header} 
+
+      header_t(file_image_t & file_image)
+         :section_t{file_image,section_type::header}
          ,m_acad_version{acad_version_t::MINIMAL}
          ,m_handle_seed{257}
          {}
@@ -41,13 +41,13 @@ namespace dxf{
 
       const char * const get_acad_version_string()const;
       acad_version_t get_acad_version() const {return m_acad_version;}
-      int32_t get_new_handle() 
+      uint64_t get_new_handle()
       {
-         int32_t result = m_handle_seed;
+         uint64_t const result = m_handle_seed;
          ++m_handle_seed;
          return result;
       }
-      void set_handle_seed( int32_t val)
+      void set_handle_seed( uint64_t val)
       {
          m_handle_seed = quan::max( m_handle_seed,val);
       }
@@ -58,12 +58,12 @@ namespace dxf{
          header_t(header_t &&) = delete;
          header_t & operator =(header_t const &) = delete;
          header_t& operator = (header_t &&) = delete;
-   
-         int32_t get_handle_seed()const { return m_handle_seed ;}
+
+         uint64_t get_handle_seed()const { return m_handle_seed ;}
          acad_version_t m_acad_version;
-         int32_t m_handle_seed; 
-         
-      
+         uint64_t m_handle_seed;
+
+
    };
 
 };

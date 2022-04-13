@@ -37,6 +37,27 @@ namespace {
       }
    }
 } // namespace
+
+bool dxf::input::lexer::get_handle(std::string const & str_in, uint64_t & out)
+{
+   if ( str_in.length() == 0){
+     std::cout << "handle string empty\n";
+      return false;
+   }
+   if ( str_in.length() > 16){
+      std::cout << "handle string too long\n";
+      return false;
+   }
+  for (auto c : str_in){
+     if (! isxdigit(c)){
+      std::cout << "non hex in handle string\n";
+         return false;
+      }
+   }
+   char * endptr;
+   out = std::strtoul(str_in.c_str(), &endptr,16);
+   return true;
+}
  // groupcode can be negative
 bool dxf::input::lexer::get_integer(std::string const & str_in, int & out)
 {
@@ -45,6 +66,7 @@ bool dxf::input::lexer::get_integer(std::string const & str_in, int & out)
       str = str.substr(1,std::string::npos);
    }
    if ( str.length() == 0){
+   std::cout << "handle string empty\n";
       return false;
    }
    if ( str.length() > 6){
@@ -97,14 +119,14 @@ bool dxf::input::lexer::get_next_pair(dxf::input::lexer::groupcode_pair & out)
       std::string str;
       if ( ! ll_getline(str)){
          return false;
-      }  
+      }
       if (! dxf::input::lexer::get_integer(str,m_input_pair.first)){
          dxf_bison_error("groupcode not integer");
          return false;
       }
       if ( ! ll_getline(str)){
          return false;
-      }  
+      }
       m_input_pair.second = str;
    }
    out = m_input_pair;
@@ -119,16 +141,16 @@ bool dxf::input::lexer::peek_next_pair(dxf::input::lexer::groupcode_pair & out)
       std::string str;
       if ( ! dxf::input::lexer::ll_getline(str)){
          return false;
-      }  
+      }
       if (! dxf::input::lexer::get_integer(str,m_lookahead_pair.first)){
          dxf_bison_error("groupcode not integer");
          return false;
       }
       if ( ! dxf::input::lexer::ll_getline(str)){
          return false;
-      }  
+      }
       m_lookahead_pair.second = str;
-      m_have_lookahead_pair = true; 
+      m_have_lookahead_pair = true;
    }
    out = m_lookahead_pair;
    return true;
@@ -139,7 +161,7 @@ namespace {
    token the_token;
 }  // ~namespace
 
-// 
+//
 void init_sections_map();
 // ret < 0 on fail else 0
 int dxf::input::lexer::init(const char * filename)
@@ -171,7 +193,7 @@ int dxf_bison_lex()
 }
 
 // return lex value
-// 0 is end of input 
+// 0 is end of input
 int dxf::input::lexer::lex()
 {
    dxf::input::lexer::groupcode_pair g_pair;
