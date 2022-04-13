@@ -13,14 +13,14 @@ namespace dxf{
 
       ~layer_table_t()
       {
-         for ( auto iter = m_layers_map.begin() ; iter != m_layers_map.end(); ++iter){
-            delete iter->second;
-            m_layers_map.erase(iter);
+         // layer table owns layers so delete the layers
+         for ( auto layer : m_layers_map){
+            delete layer.second;
          }
       }
 
       std::ostream & output_derived(std::ostream & os)const
-      { 
+      {
          for ( auto layer : m_layers_map){
            layer.second->output(os);
          }
@@ -32,10 +32,11 @@ namespace dxf{
          return m_layers_map.find(layer_name) != m_layers_map.end();
       }
 
+      // takes ownership of layer
       void add_layer(layer_t * layer)
       {
          assert(layer != nullptr);
-         
+
          auto const  layer_name = layer->get_layer_name();
          auto const iter = m_layers_map.find(layer_name);
          if (iter == m_layers_map.end()){
@@ -46,7 +47,7 @@ namespace dxf{
          std::string err_str = "dxf::add_layer, layer \"" + std::string{layer_name} + "\" already exists.";
          throw std::logic_error(err_str);
       }
-      
+
       int16_t get_max_entries() const final { return m_layers_map.size() + size_t{1};}
 
       private:
@@ -55,7 +56,7 @@ namespace dxf{
          layer_table_t& operator =(layer_table_t const & ) = delete;
          layer_table_t& operator =(layer_table_t && ) = delete;
          std::map<std::string,layer_t*> m_layers_map;
-      
+
    };
 
 }
