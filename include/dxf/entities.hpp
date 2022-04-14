@@ -10,8 +10,8 @@ namespace dxf {
 
    struct entities_t final : section_t{
 
-      entities_t(file_image_t & file_image) 
-      :section_t{ file_image,section_type::entities} 
+      entities_t(file_image_t & file_image)
+      :section_t{ file_image,section_type::entities}
       {}
 
       ~entities_t()
@@ -30,19 +30,24 @@ namespace dxf {
           return os;
       }
 
-      void add(entity_t * entity) 
+      void add(entity_t * entity)
       {
          assert(entity != nullptr);
          entity->set_file_image(this->get_file_image());
          m_entities.push_back(entity);
       }
+      std::list<entity_t*> const &
+      get_entities()const
+      {
+        return m_entities;
+      }
       private:
 
          entities_t(entities_t const &) = delete;
          entities_t(entities_t &&) = delete;
-         entities_t & operator=(entities_t const & ) = delete;  
+         entities_t & operator=(entities_t const & ) = delete;
          entities_t & operator=(entities_t && ) = delete;
-     
+
          std::list<entity_t*> m_entities;
 
    };
