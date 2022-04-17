@@ -102,8 +102,9 @@ int main()
          }
       }
       //output modified dxf
+      dxf_image.set_acad_version(dxf::acad_version_t::R14);
       std::ofstream out{out_filename};
-      out  << dxf_image;
+      out << dxf_image;
   } else{
     std::cout << "fail\n";
   }
