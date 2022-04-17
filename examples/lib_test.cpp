@@ -9,7 +9,7 @@
 
 int main(int argc , const char* argv[])
 {
-   
+
    if (argc > 1){
       try{
 
@@ -20,7 +20,7 @@ int main(int argc , const char* argv[])
          std::cout << "file written successfully\n";
       }catch(std::exception & e){
 
-         std::cout << e.what();
+         std::cerr << e.what();
          return EXIT_FAILURE;
       }
    }else{
