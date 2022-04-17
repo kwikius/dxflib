@@ -36,8 +36,15 @@ namespace dxf {
          entity->set_file_image(this->get_file_image());
          m_entities.push_back(entity);
       }
+
+
       std::list<entity_t*> const &
       get_entities()const
+      {
+        return m_entities;
+      }
+      std::list<entity_t*>  &
+      get_entities()
       {
         return m_entities;
       }
