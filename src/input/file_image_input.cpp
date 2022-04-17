@@ -10,7 +10,7 @@ namespace {
    dxf::file_image_t* the_image = nullptr;
 
    bool m_send_input_to_image = false;
-   bool m_send_input_to_stdout = true;
+   bool m_send_input_to_stdout = false;
 }
 
 // debug
@@ -56,7 +56,7 @@ dxf::file_image_t::file_image_t(const char * filename)
 ,entities{*this}
 {
    auto layer = new layer_t{"0"};
-   auto layer_table = new layer_table_t(); 
+   auto layer_table = new layer_table_t();
    tables.add(layer_table);
    layer_table->add_layer(layer);
    if ( ! dxf_image_init(*this,filename)){

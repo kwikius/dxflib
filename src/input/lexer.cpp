@@ -85,7 +85,6 @@ bool dxf::input::lexer::get_integer(std::string const & str_in, int & out)
 bool dxf::input::lexer::get_double(std::string const & str_in, double & out)
 {
    quan::detail::converter<double,char*> conv;
-   //std::cout << "instr length = " << str_in.length() << "\n";
    double res = conv (str_in.c_str(),str_in.length()+1);
    if ( conv.get_errno() == 0){
       out = res;
