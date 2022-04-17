@@ -86,8 +86,8 @@ entity_iterator line_erase_boxed_region(entity_iterator iter, box_t const & box)
 
 int main()
 {
-   const char* graphic_filename = "/home/andy/old_acer_laptop/projects/dxflib/test_graphic.dxf";
-   const char* clipbox_filename  = "/home/andy/old_acer_laptop/projects/dxflib/test_clip.dxf";
+   const char* graphic_filename = "test_graphic.dxf";
+   const char* clipbox_filename  = "test_clip.dxf";
    const char * out_filename = "test_tabbed.dxf";
 
    std::list<quan::two_d::box<double> >  clip_boxes;
