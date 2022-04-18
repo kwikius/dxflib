@@ -1,4 +1,7 @@
 
+
+#include <unistd.h>
+
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -11,7 +14,6 @@
 
 #include <dxf/file_image.hpp>
 #include <dxf/entity/line.hpp>
-
 
 bool dxf_to_clip_boxes(const char *  input_file, std::list<quan::two_d::box<double> > & out);
 
@@ -84,12 +86,58 @@ entity_iterator line_erase_boxed_region(entity_iterator iter, box_t const & box)
    return ++iter;
 }
 
-int main()
+/*
+  dxf_removetabs  -g graphic_dxf -c clipboxdxf  -o out.dxf
+*/
+int main(int argc, char *argv[])
 {
-   const char* graphic_filename = "test_graphic.dxf";
-   const char* clipbox_filename  = "test_clip.dxf";
-   const char * out_filename = "test_tabbed.dxf";
+   const char* graphic_filename = "" ;
+   const char* clipbox_filename = "";
+   const char* out_filename = "" ;
+   //get opt
+   {
+      int opt = 0;
+      int arg_flags = 0;
+      int constexpr have_graphic_filename = 1;
+      int constexpr have_clipbox_filename = 2;
+      int constexpr have_output_filename = 4;
+      while ( (opt = getopt(argc, argv, "g:c:o:")) != -1) {
+         switch (opt){
+             case 'g' : {
+               graphic_filename = optarg;
+               arg_flags |= have_graphic_filename;
+               break;
+             }
+             case 'c' : {
+               clipbox_filename = optarg;
+               arg_flags |= have_clipbox_filename;
+               break;
+             }
+             case 'o' : {
+               out_filename = optarg;
+               arg_flags |= have_output_filename;
+               break;
+             }
+             default  : std::cerr << "invalid arg\n"; break;
+         }
+      }
 
+      if( (arg_flags & have_graphic_filename) == 0){
+         std::cerr   <<  "expected graphic filename\n";
+         return EXIT_FAILURE;
+      }
+
+      if( (arg_flags & have_clipbox_filename) == 0){
+         std::cerr   <<  "expected clipbox filename\n";
+         return EXIT_FAILURE;
+      }
+
+      if( (arg_flags & have_output_filename) == 0){
+         std::cerr   <<  "expected output filename\n";
+         return EXIT_FAILURE;
+      }
+   }
+   // args ok
    std::list<quan::two_d::box<double> >  clip_boxes;
    if (dxf_to_clip_boxes(clipbox_filename , clip_boxes)){
 
